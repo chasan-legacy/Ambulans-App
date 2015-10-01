@@ -1,25 +1,18 @@
 var imei = "1234567890";
 var interval = "";
-var intervalgps = 60000;
+var intervalgps = 30000;
 var url = "http://multisolusiglobal.com";
 var status = "offline";
 
 $(document).ready(function(){
 	//intervalStart();
-	$.magnificPopup.open({
-	  items: {
-		src: '<div class="white-popup">Ada kecelakaan 1.5km dari posisi anda. terima request? <br/><br/>'+ 
-					'<a href="#" onclick="$.magnificPopup.close();">OK</a> &nbsp;&nbsp;&nbsp;'+		
-				'</div>', // can be a HTML string, jQuery object, or CSS selector
-		type: 'inline'
-	  }
-	});
 });
 
 function intervalStart()
 {
 	sendLocation(imei);
 	interval = setInterval(function(){ sendLocation(imei); }, intervalgps);
+	getMessage();
 }
 
 function sendLocation(imei)
@@ -43,6 +36,53 @@ function sendLocation(imei)
     }
 }
 
+function getMessage()
+{
+	//alert(imei);
+	$.ajax({
+		type: "GET",
+		url: url+"/ambulans/getMessage.php",
+		data: {imei:imei},
+		error: function(){
+			setTimeout(function(){ getMessage(); }, 5000);
+		},
+		success: function(d){
+			//console.log(data);
+			if(d != ""){
+				$.magnificPopup.open({
+				  items: {
+					src: '<div class="white-popup">'+d+' <br/><br/>'+ 
+								'<a href="#" onclick="readmsg()">OK</a> &nbsp;&nbsp;&nbsp;'+		
+							'</div>', // can be a HTML string, jQuery object, or CSS selector
+					type: 'inline'
+				  }
+				});
+			}else{
+				setTimeout(function(){ getMessage(); }, 5000);
+			}
+		}
+	});
+}
+
+function readmsg(){
+	$.magnificPopup.close();
+	$("#contentid").show();
+	status = "jalan ke lokasi";
+	sendLocation(imei);
+	$("#statuscontent").html('<h3>STATUS: '+status+'</h3>');
+	$.ajax({
+		type: "GET",
+		url: url+"/ambulans/getMessage.php",
+		data: {imei:imei, status: 'read'},
+		error: function(){
+			setTimeout(function(){ readmsg(); }, 5000);
+		},
+		success: function(data){
+			setTimeout(function(){ getMessage(); }, 5000);
+		}
+	});
+}
+
 function setStatus()
 {	
 	status = $("#status").val();
@@ -54,4 +94,24 @@ function setStatus()
 	{
 		intervalStart();
 	}
+	
+	$("#statuscontent").html('<h3>STATUS: '+status+'</h3>');
+}
+
+function checkpoint(){
+	
+	if(status == "jalan ke lokasi"){
+		status  = "sampai di lokasi";
+		$("#katakata").html("jalan ke RS");
+	}else if(status == "sampai di lokasi"){
+		status  = "jalan ke RS";
+		$("#katakata").html("sampai di RS");
+	}else if(status == "jalan ke RS"){
+		status  = "online";
+		$("#contentid").hide();
+	}
+	
+	sendLocation(imei);
+	
+	$("#statuscontent").html('<h3>STATUS: '+status+'</h3>');
 }
