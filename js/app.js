@@ -17,7 +17,7 @@ function intervalStart()
 
 function sendLocation(imei)
 {
-	console.log("sini 1");
+	//console.log("sini 1");
 	if (navigator.geolocation) {
         navigator.geolocation.getCurrentPosition(function(position) {
 			
@@ -26,13 +26,13 @@ function sendLocation(imei)
 				url: url+"/ambulans/saveLocation.php",
 				data: {imei:imei,lng:position.coords.longitude,lat:position.coords.latitude,status: status},
 				success: function(data){
-					console.log(data);
+					//console.log(data);
 				}
 			});
 			
 		});
     } else {
-			console.log("sini 2");
+			//console.log("sini 2");
        // x.innerHTML = "Geolocation is not supported by this browser.";
     }
 }
