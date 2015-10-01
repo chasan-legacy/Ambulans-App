@@ -26,7 +26,7 @@ function sendLocation(imei)
 				url: url+"/ambulans/saveLocation.php",
 				data: {imei:imei,lng:position.coords.longitude,lat:position.coords.latitude,status: status},
 				success: function(data){
-					//console.log(data);
+					$("#randoms").html("sessid: "+Math.random());
 				}
 			});
 			
